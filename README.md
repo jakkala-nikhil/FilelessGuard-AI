@@ -1,66 +1,178 @@
-# Intelligent Fileless Malware Detection and Suspicious Process Monitoring System
+# 🛡️ FilelessGuard AI
 
-Capstone project – ITA1438 Ethical Hacking, SIMATS Engineering
-Team: Jakkala Nikhil (192312001), Baranidharan V (192312019) | Guide: Gunasundari B
+### Intelligent Fileless Malware Detection and Suspicious Process Monitoring System
 
-A behaviour-based detector: it watches running processes, extracts behaviour
-features (parent–child chain, command line, CPU/memory), classifies each process
-with a Random Forest and raises alerts on a Streamlit dashboard.
-It is a **defensive** tool. It contains no malware and executes nothing malicious.
+![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white) ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white) ![Machine Learning](https://img.shields.io/badge/Model-Random%20Forest-22c55e) ![Version](https://img.shields.io/badge/Version-4.0-0891b2) ![Purpose](https://img.shields.io/badge/Purpose-Defensive%20Research-555555)
 
-## Project structure
+[![Live demo](https://img.shields.io/badge/Launch-Live%20Demo-06b6d4?style=for-the-badge)](https://filelessguard-ai.streamlit.app)
 
-| File | Role in the pipeline |
+**Capstone project · ITA1438 Ethical Hacking · SIMATS Engineering**
+
+## Overview
+
+FilelessGuard AI is a defensive cybersecurity research prototype that identifies potentially suspicious process behaviour using machine learning and interpretable behavioural rules. It combines process metadata, parent–child relationships and command-line indicators with a Random Forest classifier and an interactive OLED-style Streamlit dashboard.
+
+The Windows edition inspects local running processes. The public cloud edition uses fictional process records only; it does not inspect visitor or server processes or execute sampled commands. Neither edition is a replacement for antivirus software.
+
+## Live demonstration
+
+Visit **[filelessguard-ai.streamlit.app](https://filelessguard-ai.streamlit.app)** — no local installation is required. Select **Start simulated scan**, then explore alerts, process relationships, security graphs and downloadable reports.
+
+## Key features
+
+- Read-only local process monitoring and optional repeated scans.
+- Random Forest classification with hybrid behavioural rules.
+- Explainable low-risk, needs-review and high-risk classifications.
+- Interactive process relationship explorer and risk distribution charts.
+- CPU and memory visualisation (live locally, illustrative online).
+- Beginner and advanced dashboard modes.
+- Guard Assistant: a rule-based educational guide, not a generative chatbot.
+- Safe demonstration, learning centre and CSV/text report exports.
+- Local-only Windows publisher checks, optional desktop notifications and scan-total history.
+
+## System architecture
+
+```mermaid
+flowchart TD
+    A[Local Windows process metadata] --> C[Feature extraction]
+    B[Fictional cloud demo records] --> C
+    C --> D[Random Forest classifier]
+    C --> E[Behavioural indicators]
+    D --> F[Hybrid risk decision]
+    E --> F
+    F --> G[Streamlit dashboard]
+    G --> H[Alerts and process explorer]
+    G --> I[Graphs and reports]
+```
+
+The hybrid decision requires a model score of at least 0.80 and at least two corroborating behavioural indicators for a high-risk label. A score of at least 0.50 or a corroborating indicator can trigger a needs-review label. These are review priorities, not confirmed infections or calibrated infection probabilities.
+
+## Local vs. cloud edition
+
+| Capability | Local V4.0 | Public cloud |
+|---|---|---|
+| Entry point | `app_v40.py` | `app_cloud.py` |
+| Process data | Local snapshot | Fictional records |
+| Classification and graphs | Yes | Yes |
+| Process explorer | Yes | Simulated |
+| CPU / memory | Live | Illustrative |
+| Windows publisher checks and notifications | Windows only | No |
+| CSV / text reports | Yes | Demo reports |
+| Persistent scan totals | Optional, local | No |
+
+## Model evaluation
+
+The bundled Random Forest was evaluated using 3,200 synthetic training records and 800 synthetic test records.
+
+| Metric | Held-out synthetic test result |
+|---|---:|
+| Accuracy | 98.00% |
+| Precision | 98.25% |
+| Recall | 94.94% |
+| F1-score | 96.57% |
+
+| Confusion matrix | Predicted benign | Predicted malicious |
+|---|---:|---:|
+| Actual benign | 559 | 4 |
+| Actual malicious | 12 | 225 |
+
+| Confusion matrix | Feature importance |
 |---|---|
-| `src/collector.py` | **Monitor / Extract** – reads processes with psutil (PID, name, parent, CPU, memory, command line) |
-| `src/sysmon_source.py` | Optional Sysmon Event ID 1 reader (Windows, Administrator) |
-| `src/features.py` | Feature extraction (encoded command, hidden window, Office parent, download cradle, entropy …) |
-| `src/data_gen.py` | Synthetic training data for the demo (text records only) |
-| `train.py` | Trains the Random Forest, writes metrics, confusion matrix, feature-importance chart |
-| `src/detector.py` | **Analyze** (Random Forest verdict) and **Alert** (writes `logs/alerts.csv`) |
-| `monitor.py` | Command-line monitor |
-| `app.py` | Streamlit dashboard |
-| `src/samples.py` | Safe simulated suspicious events for the live demo |
-| `tests/` | Unit tests |
+| ![Confusion matrix](models/confusion_matrix.png) | ![Feature importance](models/feature_importance.png) |
 
-## Setup (Windows, Python 3.10+)
+> These figures are from the bundled synthetic Random Forest evaluation (`models/metrics.json`). They are not real-world malware detection accuracy or a validation of the hybrid rules.
 
+## Technology stack
+
+Python · Streamlit · scikit-learn · psutil · pandas · NumPy · joblib · Matplotlib · Altair (via Streamlit) · GitHub · Streamlit Community Cloud
+
+## Installation and usage
+
+For local monitoring, use Windows and a Python environment compatible with the dependencies. Git is needed for cloning; alternatively download the repository ZIP.
+
+```powershell
+git clone https://github.com/jakkala-nikhil/FilelessGuard-AI.git
+cd FilelessGuard-AI
+python -m pip install -r requirements.txt
+python -m streamlit run app_v40.py
 ```
-pip install -r requirements.txt
+
+Open `http://localhost:8501`. Select **Start security scan**. If the bundled model cannot be loaded because of a dependency version mismatch, regenerate it using `python train.py` in the same environment. Retraining replaces the generated model and evaluation files.
+
+To run the simulation-only edition locally:
+
+```powershell
+python -m streamlit run app_cloud.py
+```
+
+Other commands:
+
+```powershell
 python train.py
-streamlit run app.py
+python monitor.py --simulate --once
+python -m unittest discover tests
 ```
 
-Command line alternative: `python monitor.py --simulate --once` or `python monitor.py --interval 5`.
-Run tests: `python -m unittest discover tests`.
+The CLI uses local process snapshots even with `--simulate`; the flag adds fictional events. Optional Windows Sysmon Event ID 1 collection is available through `--sysmon` after installing Sysmon and obtaining the required permissions.
 
-For Sysmon events, install Sysmon (Microsoft Sysinternals), open an Administrator
-prompt and add `--sysmon` to `monitor.py`.
+## Repository structure
 
-## Demo script for the faculty (about 5 minutes)
+```text
+FilelessGuard-AI/
+├── .streamlit/config.toml   # Dashboard theme
+├── app_v40.py               # Local dashboard
+├── app_cloud.py             # Public simulation dashboard
+├── guard_v4.py              # Hybrid rules and local helpers
+├── Start_FilelessGuard.bat  # Windows launcher
+├── monitor.py               # Command-line monitor
+├── train.py                 # Model training and evaluation
+├── requirements.txt
+├── models/                  # Model, metrics and evaluation charts
+├── src/
+│   ├── collector.py         # Process metadata collection
+│   ├── features.py          # Feature extraction
+│   ├── detector.py          # Classification and CLI alert logging
+│   ├── data_gen.py          # Synthetic training data
+│   ├── samples.py           # Fictional demonstration records
+│   └── sysmon_source.py     # Optional Windows event source
+└── tests/test_pipeline.py   # Unit tests
+```
 
-1. Show the architecture diagram, then `python train.py` and the metrics.
-2. Start `streamlit run app.py`. The *Live processes* tab lists every process with a verdict.
-3. Keep **Inject simulated suspicious events** on: Office → PowerShell with an encoded,
-   hidden command appears as MALICIOUS with the indicators that fired.
-4. Open *Alert history* (also saved in `logs/alerts.csv`) and *Model & evaluation*.
-5. Move the threshold sliders to show the false-negative / false-positive trade-off.
+## Faculty demonstration (5 minutes)
 
-## Important: be honest about the results
+1. Open the public website and introduce the research problem.
+2. Start a simulated scan and explain the three risk labels.
+3. Explore a flagged record and its parent–child relationships.
+4. Show security graphs, model evaluation and Guard Assistant.
+5. Export a demo report and discuss limitations and future work.
 
-The bundled model is trained on **synthetic** data, so the displayed accuracy
-(about 98 %) only shows that the pipeline works. It is **not** real-world performance.
-For your report:
+## Privacy, ethics and limitations
 
-* Train on a real labelled dataset: `python train.py --csv mydata.csv`
-  (columns: `name, parent_name, cmdline, cpu_percent, memory_mb, num_children, chain_depth, label`).
-* Report the metrics that `train.py` prints for the held-out test set, and state the dataset used.
-* Safe testing only: use your own machine or an isolated virtual machine.
+- Use local monitoring only on systems you own or are authorised to inspect.
+- Local process command lines can contain sensitive information. Keep logs and private exports out of GitHub.
+- The cloud edition uses fictional data; no malware execution is required.
+- False positives and missed threats are possible. Do not terminate or delete processes solely because of a classification.
+- The system does not perform direct memory inspection or collect API-call sequences.
+- Real-world performance, hybrid rule effectiveness and cross-platform compatibility require further validation.
 
-## Known limitations
+## Future scope
 
-* Accuracy depends on training data; unseen techniques may be missed.
-* On Linux/macOS process names are mapped to `.exe` only for demonstration; the tool targets Windows.
-* API-call sequences (listed in the slides) are not collected; features use process metadata and command lines.
-* `sysmon_source.py` and the Streamlit dashboard were written to run on your Windows machine; the XML parser
-  and the rest of the pipeline were tested, the live dashboard UI should be checked on your system.
+- Evaluate on authorised, representative labelled datasets.
+- Personalised process-behaviour baselines and improved false-positive handling.
+- PDF security reports and a standalone Windows application.
+- Background monitoring with explicit consent and resource controls.
+
+## Project team
+
+| Role | Name |
+|---|---|
+| Student developer | Jakkala Nikhil |
+| Student developer | Baranidharan V |
+| Project guide | Gunasundari B |
+
+**Institution:** SIMATS Engineering  
+**Course:** ITA1438 — Ethical Hacking
+
+---
+
+**FilelessGuard AI V4.0** · Academic research prototype · Defensive cybersecurity education
