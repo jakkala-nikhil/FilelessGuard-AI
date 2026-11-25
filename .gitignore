@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+logs/
+*.log
+*.csv
+.streamlit/secrets.toml
+.vscode/
+.idea/
+*.zip
+*.docx
+*.pptx
+*.pdf
+app_backup.py
