@@ -1,3 +1,6 @@
+<p align="center">
+  <img src="assets/logo.png" width="850" alt="FilelessGuard AI">
+</p>
 # 🛡️ FilelessGuard AI
 
 ### Intelligent Fileless Malware Detection and Suspicious Process Monitoring System
