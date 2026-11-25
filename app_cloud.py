@@ -89,12 +89,20 @@ def need_scan():
     st.info('Run a simulated scan to begin.')
     st.button('Go to demo scan',on_click=go,args=('Run demo scan',),key='go_scan')
 
-if page=='Home':
+if page == 'Home':
+    from pathlib import Path
+    logo_path = Path(__file__).resolve().parent / "assets" / "logo.png"
+
+    if logo_path.is_file():
+        st.image(str(logo_path), width="stretch")
+
     st.title('FilelessGuard AI — public demonstration')
     st.write('Explore fictional process records and learn how the classifier identifies unusual activity.')
     st.caption('Simulation-only research prototype • Not an antivirus')
-    if st.button('Start simulated scan',type='primary',width='stretch'):
+
+    if st.button('Start simulated scan', type='primary', width='stretch'):
         scan()
+
     if 'result' in S:
         import pandas as pd
         import altair as alt
