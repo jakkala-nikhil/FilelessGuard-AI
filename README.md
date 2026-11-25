@@ -179,3 +179,25 @@ FilelessGuard-AI/
 ---
 
 **FilelessGuard AI V4.0** · Academic research prototype · Defensive cybersecurity education
+---
+
+## 📸 Application Screenshots
+
+### 🏠 Homepage
+![Homepage](assets/screenshots/homepage.png)
+
+### 🛡️ Malware Detection and Scan Results
+![Scan Results](assets/screenshots/scan_results.png)
+
+### 🔍 Process Explorer
+![Process Explorer](assets/screenshots/process_explorer.png)
+
+### 📊 Security Analytics
+![Security Graphs](assets/screenshots/security_graphs.png)
+
+### 🤖 Guard Assistant
+![Guard Assistant](assets/screenshots/guard_assistant.png)
+
+---
+
+*All screenshots showcase the public demonstration using simulated process data.*
